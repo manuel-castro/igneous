@@ -25,6 +25,7 @@ cdef extern from "cMesher.h":
         vector[uint64_t] ids()
         MeshObject get_mesh(uint64_t, bool normals, int simplification_factor, int max_simplification_error)
         MeshObject simplify(const MeshObject &pymesh, int simplification_factor, int max_simplification_error, bool generate_normals)
+        MeshObject simplifyV2(int simplification_factor, int max_simplification_error, bool generate_normals)
 
 # creating a cython wrapper class
 cdef class Mesher:
@@ -44,3 +45,5 @@ cdef class Mesher:
         return self.thisptr.get_mesh(mesh_id, normals, simplification_factor, max_simplification_error)
     def simplify(self, pymesh, simplification_factor, max_simplification_error, generate_normals=False):
         return self.thisptr.simplify(pymesh, simplification_factor, max_simplification_error, generate_normals)
+    def simplifyV2(self, simplification_factor, max_simplification_error, generate_normals=False):
+        return self.thisptr.simplifyV2(simplification_factor, max_simplification_error, generate_normals)

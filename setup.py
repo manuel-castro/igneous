@@ -21,7 +21,7 @@ setuptools.setup(
       ':python_version == "2.7"': ['futures'],
       ':python_version == "2.6"': ['futures'],
     },
-    pbr=True,
+    pbr=False,
     ext_modules=[
         setuptools.Extension(
             'igneous._mesher',

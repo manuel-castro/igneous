@@ -33,4 +33,7 @@ class CMesher {
   MeshObject get_mesh(uint64_t id, bool generate_normals, int simplification_factor, int max_error);
   MeshObject simplify(const MeshObject &obj, int simplification_factor,
                       int max_error, bool generate_normals);
+  MeshObject simplifyV2(int simplification_factor,
+                        int max_simplification_error,
+                        bool generate_normals);
 };

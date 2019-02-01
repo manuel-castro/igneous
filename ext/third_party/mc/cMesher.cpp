@@ -144,3 +144,17 @@ MeshObject CMesher::simplify(const MeshObject &pymesh,
 
   return collect_simplified_mesh(generate_normals);
 }
+
+MeshObject CMesher::simplifyV2(int simplification_factor,
+                               int max_simplification_error,
+                               bool generate_normals = false)
+{
+  if (simplification_factor > 0)
+  {
+    // This is the most cpu intensive line
+    simplifier_.optimize(
+        simplifier_.face_count() / simplification_factor,
+        max_simplification_error);
+  }
+  return collect_simplified_mesh(generate_normals);
+}

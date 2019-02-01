@@ -12,6 +12,7 @@ import math
 import os
 import random
 import re
+import time
 # from tempfile import NamedTemporaryFile  # used by BigArrayTask
 
 # from backports import lzma               # used by HyperSquareTask
@@ -291,16 +292,40 @@ class MeshTask(RegisteredTask):
         else:
           remapped_id = self._remap_list[obj_id]
 
+        time_start = time.time()
+        best_mesh = self._get_mesh(obj_id)
         storage.put_file(
             file_path='{}/{}:{}:{}'.format(
-                self._mesh_dir, remapped_id, self.options['lod'],
+                self._mesh_dir, remapped_id, 0,
                 self._bounds.to_filename()
             ),
-            content=self._create_mesh(obj_id),
+            #content=self._create_mesh(obj_id),
+            content=self._format_mesh_output(best_mesh),
             compress=True,
             cache_control=self.options['cache_control']
         )
 
+        simplified_mesh = best_mesh
+        simplified_max_error = self.options['max_simplification_error']
+        for lod in range(1, self.options['lod']):
+          print("creating level of detail %d mesh" % (lod))
+          simplified_max_error *= 2
+          simplified_mesh = self._mesher.simplifyV2(
+              simplification_factor=self.options['simplification_factor'],
+              max_simplification_error=simplified_max_error)
+          storage.put_file(
+            file_path='{}/{}:{}:{}'.format(
+                self._mesh_dir, remapped_id, lod,
+                self._bounds.to_filename()
+            ),
+            #content=self._create_mesh(obj_id),
+            content=self._format_mesh_output(simplified_mesh),
+            compress=True,
+            cache_control=self.options['cache_control']
+          )
+
+        print("Preview Mesh for layer 2 Node ID %d: %.3fms" %
+            (obj_id, (time.time() - time_start) * 1000))
         if self.options['generate_manifests']:
           fragments = []
           fragments.append('{}:{}:{}'.format(remapped_id, self.options['lod'],
@@ -315,11 +340,29 @@ class MeshTask(RegisteredTask):
           )
 
   def _create_mesh(self, obj_id):
-    mesh = self._mesher.get_mesh(
+    return self._format_mesh_output(self._get_mesh(obj_id))
+    # mesh = self._mesher.get_mesh(
+    #     obj_id,
+    #     simplification_factor=self.options['simplification_factor'],
+    #     max_simplification_error=self.options['max_simplification_error']
+    # )
+    # vertices = self._update_vertices(
+    #     np.array(mesh['points'], dtype=np.float32))
+    # vertex_index_format = [
+    #     np.uint32(len(vertices) / 3), # Number of vertices (3 coordinates)
+    #     vertices,
+    #     np.array(mesh['faces'], dtype=np.uint32)
+    # ]
+    # return b''.join([array.tobytes() for array in vertex_index_format])
+
+  def _get_mesh(self, obj_id):
+    return self._mesher.get_mesh(
         obj_id,
         simplification_factor=self.options['simplification_factor'],
         max_simplification_error=self.options['max_simplification_error']
     )
+
+  def _format_mesh_output(self, mesh):
     vertices = self._update_vertices(
         np.array(mesh['points'], dtype=np.float32))
     vertex_index_format = [
