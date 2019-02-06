@@ -47,3 +47,23 @@ cdef class Mesher:
         return self.thisptr.simplify(pymesh, simplification_factor, max_simplification_error, generate_normals)
     def simplifyV2(self, simplification_factor, max_simplification_error, generate_normals=False):
         return self.thisptr.simplifyV2(simplification_factor, max_simplification_error, generate_normals)
+
+cdef class PyMeshObject:
+    cdef MeshObject *thisptr
+    def __cinit__(self, points, normals, faces):
+        self.thisptr = new CMesher(voxel_res.astype(np.uint32))
+    def __dealloc__(self):
+        del self.thisptr
+    def mesh(self, data):    
+        self.thisptr.mesh(
+            data.astype(np.uint64).flatten(), 
+            data.shape[0], data.shape[1], data.shape[2]
+        )
+    def ids(self):
+        return self.thisptr.ids()
+    def get_mesh(self, mesh_id, normals=False, simplification_factor=0, max_simplification_error=8):
+        return self.thisptr.get_mesh(mesh_id, normals, simplification_factor, max_simplification_error)
+    def simplify(self, pymesh, simplification_factor, max_simplification_error, generate_normals=False):
+        return self.thisptr.simplify(pymesh, simplification_factor, max_simplification_error, generate_normals)
+    def simplifyV2(self, simplification_factor, max_simplification_error, generate_normals=False):
+        return self.thisptr.simplifyV2(simplification_factor, max_simplification_error, generate_normals)

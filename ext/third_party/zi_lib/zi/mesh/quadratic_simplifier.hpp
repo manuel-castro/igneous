@@ -452,11 +452,11 @@ public:
         //generate_normals();
 
         invalid_.clear();
-        std::cout << "Face ratio: " << ( static_cast< double >( mesh_.face_count() ) / target_faces ) << "\n";
-        std::cout << "Next error: " << this->min_error() << "\n";
-        std::cout << "Total Face: " << mesh_.face_count() << "\n";
-        std::cout << "Heap Size : " << heap_.size() << "\n";
-        std::cout << "Bad  Size : " << bad << "\n";
+        // std::cout << "Face ratio: " << ( static_cast< double >( mesh_.face_count() ) / target_faces ) << "\n";
+        // std::cout << "Next error: " << this->min_error() << "\n";
+        // std::cout << "Total Face: " << mesh_.face_count() << "\n";
+        // std::cout << "Heap Size : " << heap_.size() << "\n";
+        // std::cout << "Bad  Size : " << bad << "\n";
         return mesh_.face_count();
     }
 

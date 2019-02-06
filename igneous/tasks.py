@@ -24,10 +24,11 @@ from tqdm import tqdm
 
 from cloudvolume import CloudVolume, Storage
 from cloudvolume.lib import min2, Vec, Bbox, mkdir
+from cloudvolume.meshservice import PrecomputedMeshService
 from taskqueue import RegisteredTask
 
 from igneous import chunks, downsample, downsample_scales
-from igneous import Mesher  # broken out for ease of commenting out
+from igneous import Mesher, MeshObject  # broken out for ease of commenting out
 
 
 def downsample_and_upload(
@@ -243,8 +244,9 @@ class MeshTask(RegisteredTask):
   def execute(self):
     self._volume = CloudVolume(
         self.layer_path, self.options['mip'], bounded=False,
-        parallel=self.options['parallel_download'])
-    self._bounds = Bbox(self.offset, self.shape + self.offset)
+        parallel=3)
+    # self._bounds = Bbox(self.offset, self.shape + self.offset)
+    self._bounds = Bbox((44200//4, 36880//4, 1200), (45100//4, 37300//4, 1300))
     self._bounds = Bbox.clamp(self._bounds, self._volume.bounds)
 
     self._mesher = Mesher(self._volume.resolution)
@@ -266,9 +268,12 @@ class MeshTask(RegisteredTask):
       raise ValueError("The mesh destination is not present in the info file.")
 
     # chunk_position includes the overlap specified by low_padding/high_padding
+    # import ipdb
+    # ipdb.set_trace()
     self._data = self._volume[data_bounds.to_slices()]
     self._remap()
-    self._compute_meshes()
+    #self._compute_meshes()
+    self._simplify_meshes()
 
   def _remap(self):
     if self.options['remap_table'] is not None:
@@ -286,14 +291,20 @@ class MeshTask(RegisteredTask):
     with Storage(self.layer_path) as storage:
       data = self._data[:, :, :, 0].T
       self._mesher.mesh(data)
+      downsampleTimeArr = np.zeros(self.options['lod'])
+      ioTimeArr = np.zeros(self.options['lod'])
+      numberKiloBytes = np.zeros(self.options['lod'])
       for obj_id in self._mesher.ids():
         if self.options['remap_table'] is None:
           remapped_id = obj_id
         else:
           remapped_id = self._remap_list[obj_id]
 
-        time_start = time.time()
+        last_time = time.time()
         best_mesh = self._get_mesh(obj_id)
+        downsampleTimeArr[0] += (time.time() - last_time) * 1000
+        numberKiloBytes[0] += (len(np.array(best_mesh['points'])) + len(np.array(best_mesh['faces']))) * 12. / 1024.
+        last_time = time.time()
         storage.put_file(
             file_path='{}/{}:{}:{}'.format(
                 self._mesh_dir, remapped_id, 0,
@@ -304,15 +315,33 @@ class MeshTask(RegisteredTask):
             compress=True,
             cache_control=self.options['cache_control']
         )
+        if self.options['generate_manifests']:
+          fragments = []
+          fragments.append('{}:{}:{}'.format(remapped_id, 0,
+                                            self._bounds.to_filename()))
+
+          storage.put_file(
+              file_path='{}/{}:{}'.format(
+                  self._mesh_dir, remapped_id, 0),
+              content=json.dumps({"fragments": fragments}),
+              content_type='application/json',
+              cache_control=self.options['cache_control']
+          )
+        ioTimeArr[0] += (time.time() - last_time) * 1000
+        last_time = time.time()
 
         simplified_mesh = best_mesh
         simplified_max_error = self.options['max_simplification_error']
         for lod in range(1, self.options['lod']):
-          print("creating level of detail %d mesh" % (lod))
+          # print("creating level of detail %d mesh" % (lod))
           simplified_max_error *= 2
+          last_time = time.time()
           simplified_mesh = self._mesher.simplifyV2(
               simplification_factor=self.options['simplification_factor'],
               max_simplification_error=simplified_max_error)
+          downsampleTimeArr[lod] += (time.time() - last_time) * 1000
+          numberKiloBytes[lod] += (len(np.array(simplified_mesh['points'])) + len(np.array(simplified_mesh['faces']))) * 12. / 1024.
+          last_time = time.time()
           storage.put_file(
             file_path='{}/{}:{}:{}'.format(
                 self._mesh_dir, remapped_id, lod,
@@ -323,21 +352,41 @@ class MeshTask(RegisteredTask):
             compress=True,
             cache_control=self.options['cache_control']
           )
+          if self.options['generate_manifests']:
+            fragments = []
+            fragments.append('{}:{}:{}'.format(remapped_id, lod,
+                                              self._bounds.to_filename()))
 
-        print("Preview Mesh for layer 2 Node ID %d: %.3fms" %
-            (obj_id, (time.time() - time_start) * 1000))
-        if self.options['generate_manifests']:
-          fragments = []
-          fragments.append('{}:{}:{}'.format(remapped_id, self.options['lod'],
-                                             self._bounds.to_filename()))
+            storage.put_file(
+                file_path='{}/{}:{}'.format(
+                    self._mesh_dir, remapped_id, lod),
+                content=json.dumps({"fragments": fragments}),
+                content_type='application/json',
+                cache_control=self.options['cache_control']
+            )
+          ioTimeArr[lod] += (time.time() - last_time) * 1000
+          last_time = time.time()
+      print('ioTime', ioTimeArr)
+      print('downsampleTime', downsampleTimeArr)
+      print('sizeInKB', numberKiloBytes)
+      print('number objects', len(self._mesher.ids()))
 
-          storage.put_file(
-              file_path='{}/{}:{}'.format(
-                  self._mesh_dir, remapped_id, self.options['lod']),
-              content=json.dumps({"fragments": fragments}),
-              content_type='application/json',
-              cache_control=self.options['cache_control']
-          )
+        # print("Preview Mesh for layer 2 Node ID %d: %.3fms" %
+        #     (obj_id, (time.time() - time_start) * 1000))
+
+  def _simplify_meshes(self):
+    mesh_service = PrecomputedMeshService(self._volume)
+    import ipdb
+    with Storage(self.layer_path) as storage:
+      data = self._data[:, :, :, 0].T
+      seg_ids = np.unique(data)
+      seg_ids = seg_ids[np.nonzero(seg_ids)]
+      # mesh = mesh_service.get(seg_ids[0], fuse=False)
+      mesh = mesh_service.get(480655303136, fuse=False)
+      m = mesh[480655303136]
+      ipdb.set_trace()
+
+
 
   def _create_mesh(self, obj_id):
     return self._format_mesh_output(self._get_mesh(obj_id))
