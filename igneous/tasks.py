@@ -270,7 +270,7 @@ class MeshTask(RegisteredTask):
     # chunk_position includes the overlap specified by low_padding/high_padding
     # import ipdb
     # ipdb.set_trace()
-    self._data = self._volume[data_bounds.to_slices()]
+    # self._data = self._volume[data_bounds.to_slices()]
     self._remap()
     #self._compute_meshes()
     self._simplify_meshes()
@@ -378,12 +378,12 @@ class MeshTask(RegisteredTask):
     mesh_service = PrecomputedMeshService(self._volume)
     import ipdb
     with Storage(self.layer_path) as storage:
-      data = self._data[:, :, :, 0].T
-      seg_ids = np.unique(data)
-      seg_ids = seg_ids[np.nonzero(seg_ids)]
+      # data = self._data[:, :, :, 0].T
+      # seg_ids = np.unique(data)
+      # seg_ids = seg_ids[np.nonzero(seg_ids)]
       # mesh = mesh_service.get(seg_ids[0], fuse=False)
-      mesh = mesh_service.get(480655303136, fuse=False)
-      m = mesh[480655303136]
+      mesh = mesh_service.get(1069762216940, fuse=False)
+      m = mesh[1069762216940]
       ipdb.set_trace()
 
 
