@@ -28,7 +28,7 @@ from cloudvolume.meshservice import PrecomputedMeshService
 from taskqueue import RegisteredTask
 
 from igneous import chunks, downsample, downsample_scales
-from igneous import Mesher, MeshObject  # broken out for ease of commenting out
+from igneous import Mesher  # broken out for ease of commenting out
 
 
 def downsample_and_upload(
@@ -270,10 +270,10 @@ class MeshTask(RegisteredTask):
     # chunk_position includes the overlap specified by low_padding/high_padding
     # import ipdb
     # ipdb.set_trace()
-    # self._data = self._volume[data_bounds.to_slices()]
+    self._data = self._volume[data_bounds.to_slices()]
     self._remap()
-    #self._compute_meshes()
-    self._simplify_meshes()
+    self._compute_meshes()
+    #self._simplify_meshes()
 
   def _remap(self):
     if self.options['remap_table'] is not None:
