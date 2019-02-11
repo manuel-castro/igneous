@@ -16,6 +16,12 @@ struct MeshObject {
   std::vector<unsigned int> faces;
 };
 
+// struct DracoEncodedMeshObject {
+//   // std::vector<char> buffer;
+//   // char *buffer;
+//   std::vector<char> *buffer;
+// };
+
 class CMesher {
  private:
   zi::mesh::marching_cubes<uint64_t> marchingcubes_;
@@ -29,4 +35,6 @@ class CMesher {
             unsigned int sz);
   std::vector<uint64_t> ids();
   MeshObject get_mesh(uint64_t id, bool generate_normals, int simplification_factor, int max_error);
+  std::vector<char> *get_draco_encoded_mesh(uint64_t id, bool generate_normals, int simplification_factor, int max_error);
+  // get_draco_mesh_buffer
 };

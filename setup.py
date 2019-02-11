@@ -31,7 +31,7 @@ setuptools.setup(
             sources=[ os.path.join(third_party_dir, name) for name in ('mc/_mesher.cpp','mc/cMesher.cpp') ],
             depends=[ os.path.join(third_party_dir, 'mc/cMesher.h')],
             language='c++',
-            include_dirs=[ os.path.join(third_party_dir, name) for name in ('zi_lib/', 'mc/') ],
+            include_dirs=[ os.path.join(third_party_dir, name) for name in ('zi_lib/', 'mc/', 'draco/src/') ],
             extra_compile_args=[
               '-std=c++11','-O3'
             ]), #don't use  '-fvisibility=hidden', python can't see init module
@@ -43,16 +43,16 @@ setuptools.setup(
             include_dirs=[np.get_include()],
             extra_compile_args=[
               '-std=c++11', '-O3'
-            ]), #don't use  '-fvisibility=hidden', python can't see init module
-        setuptools.Extension(
-            'igneous._draco',
-            sources=[ os.path.join(third_party_dir, name) for name in ('draco_cython/_draco.cpp','draco_helper/draco.cpp') ],
-            depends=[ os.path.join(third_party_dir, 'draco_cython/draco.h') ],
-            language='c++',
-            include_dirs=[ os.path.join(third_party_dir, name) for name in ('draco/', 'draco_cython/') ],
-            extra_compile_args=[
-              '-std=c++11', '-O3'
-            ]) #don't use  '-fvisibility=hidden', python can't see init module
+            ])#, #don't use  '-fvisibility=hidden', python can't see init module
+        # setuptools.Extension(
+        #     'igneous._draco',
+        #     sources=[ os.path.join(third_party_dir, name) for name in ('draco_cython/_draco.cpp','draco_helper/draco.cpp') ],
+        #     depends=[ os.path.join(third_party_dir, 'draco_cython/draco.h') ],
+        #     language='c++',
+        #     include_dirs=[ os.path.join(third_party_dir, name) for name in ('draco/', 'draco_cython/') ],
+        #     extra_compile_args=[
+        #       '-std=c++11', '-O3'
+        #     ]) #don't use  '-fvisibility=hidden', python can't see init module
     ],
 )
 
