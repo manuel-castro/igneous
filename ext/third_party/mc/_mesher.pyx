@@ -25,7 +25,7 @@ cdef extern from "cMesher.h":
         void mesh(vector[uint64_t], unsigned int, unsigned int, unsigned int)
         vector[uint64_t] ids()
         MeshObject get_mesh(uint64_t, bool normals, int simplification_factor, int max_simplification_error)
-        vector[char] *get_draco_encoded_mesh(uint64_t, bool normals, int simplification_factor, int max_simplification_error)
+        int get_draco_encoded_mesh(uint64_t, bool normals, int simplification_factor, int max_simplification_error)
 
 # creating a cython wrapper class
 cdef class Mesher:
@@ -44,4 +44,4 @@ cdef class Mesher:
     def get_mesh(self, mesh_id, normals=False, simplification_factor=0, max_simplification_error=8):
         return self.thisptr.get_mesh(mesh_id, normals, simplification_factor, max_simplification_error)
     def get_draco_encoded_mesh(self, mesh_id, normals=False, simplification_factor=0, max_simplification_error=8):
-        return dereference(self.thisptr.get_draco_encoded_mesh(mesh_id, normals, simplification_factor, max_simplification_error))
+        return self.thisptr.get_draco_encoded_mesh(mesh_id, normals, simplification_factor, max_simplification_error)

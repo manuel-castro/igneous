@@ -919,7 +919,7 @@ static CYTHON_INLINE PyObject* __Pyx_PyInt_From_unsigned_int(unsigned int value)
 
 static PyObject* __pyx_convert__to_py_struct__MeshObject(struct MeshObject s);
 /* CIntToPy.proto */
-static CYTHON_INLINE PyObject* __Pyx_PyInt_From_char(char value);
+static CYTHON_INLINE PyObject* __Pyx_PyInt_From_int(int value);
 
 /* CIntFromPy.proto */
 static CYTHON_INLINE uint32_t __Pyx_PyInt_As_uint32_t(PyObject *);
@@ -963,7 +963,6 @@ static std::vector<uint64_t>  __pyx_convert_vector_from_py_uint64_t(PyObject *);
 static PyObject *__pyx_convert_vector_to_py_uint64_t(const std::vector<uint64_t>  &); /*proto*/
 static PyObject *__pyx_convert_vector_to_py_float(const std::vector<float>  &); /*proto*/
 static PyObject *__pyx_convert_vector_to_py_unsigned_int(const std::vector<unsigned int>  &); /*proto*/
-static PyObject *__pyx_convert_vector_to_py_char(const std::vector<char>  &); /*proto*/
 #define __Pyx_MODULE_NAME "_mesher"
 int __pyx_module_is_main__mesher = 0;
 
@@ -1570,7 +1569,7 @@ static PyObject *__pyx_pf_7_mesher_6Mesher_8get_mesh(struct __pyx_obj_7_mesher_M
  *     def get_mesh(self, mesh_id, normals=False, simplification_factor=0, max_simplification_error=8):
  *         return self.thisptr.get_mesh(mesh_id, normals, simplification_factor, max_simplification_error)             # <<<<<<<<<<<<<<
  *     def get_draco_encoded_mesh(self, mesh_id, normals=False, simplification_factor=0, max_simplification_error=8):
- *         return dereference(self.thisptr.get_draco_encoded_mesh(mesh_id, normals, simplification_factor, max_simplification_error))
+ *         return self.thisptr.get_draco_encoded_mesh(mesh_id, normals, simplification_factor, max_simplification_error)
  */
   __Pyx_XDECREF(__pyx_r);
   __pyx_t_1 = __Pyx_PyInt_As_uint64_t(__pyx_v_mesh_id); if (unlikely((__pyx_t_1 == ((uint64_t)-1)) && PyErr_Occurred())) __PYX_ERR(0, 45, __pyx_L1_error)
@@ -1606,7 +1605,7 @@ static PyObject *__pyx_pf_7_mesher_6Mesher_8get_mesh(struct __pyx_obj_7_mesher_M
  *     def get_mesh(self, mesh_id, normals=False, simplification_factor=0, max_simplification_error=8):
  *         return self.thisptr.get_mesh(mesh_id, normals, simplification_factor, max_simplification_error)
  *     def get_draco_encoded_mesh(self, mesh_id, normals=False, simplification_factor=0, max_simplification_error=8):             # <<<<<<<<<<<<<<
- *         return dereference(self.thisptr.get_draco_encoded_mesh(mesh_id, normals, simplification_factor, max_simplification_error))
+ *         return self.thisptr.get_draco_encoded_mesh(mesh_id, normals, simplification_factor, max_simplification_error)
  */
 
 /* Python wrapper */
@@ -1703,14 +1702,14 @@ static PyObject *__pyx_pf_7_mesher_6Mesher_10get_draco_encoded_mesh(struct __pyx
   /* "_mesher.pyx":47
  *         return self.thisptr.get_mesh(mesh_id, normals, simplification_factor, max_simplification_error)
  *     def get_draco_encoded_mesh(self, mesh_id, normals=False, simplification_factor=0, max_simplification_error=8):
- *         return dereference(self.thisptr.get_draco_encoded_mesh(mesh_id, normals, simplification_factor, max_simplification_error))             # <<<<<<<<<<<<<<
+ *         return self.thisptr.get_draco_encoded_mesh(mesh_id, normals, simplification_factor, max_simplification_error)             # <<<<<<<<<<<<<<
  */
   __Pyx_XDECREF(__pyx_r);
   __pyx_t_1 = __Pyx_PyInt_As_uint64_t(__pyx_v_mesh_id); if (unlikely((__pyx_t_1 == ((uint64_t)-1)) && PyErr_Occurred())) __PYX_ERR(0, 47, __pyx_L1_error)
   __pyx_t_2 = __Pyx_PyObject_IsTrue(__pyx_v_normals); if (unlikely((__pyx_t_2 == ((bool)-1)) && PyErr_Occurred())) __PYX_ERR(0, 47, __pyx_L1_error)
   __pyx_t_3 = __Pyx_PyInt_As_int(__pyx_v_simplification_factor); if (unlikely((__pyx_t_3 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 47, __pyx_L1_error)
   __pyx_t_4 = __Pyx_PyInt_As_int(__pyx_v_max_simplification_error); if (unlikely((__pyx_t_4 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 47, __pyx_L1_error)
-  __pyx_t_5 = __pyx_convert_vector_to_py_char((*__pyx_v_self->thisptr->get_draco_encoded_mesh(__pyx_t_1, __pyx_t_2, __pyx_t_3, __pyx_t_4))); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 47, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_PyInt_From_int(__pyx_v_self->thisptr->get_draco_encoded_mesh(__pyx_t_1, __pyx_t_2, __pyx_t_3, __pyx_t_4)); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 47, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
   __pyx_r = __pyx_t_5;
   __pyx_t_5 = 0;
@@ -1720,7 +1719,7 @@ static PyObject *__pyx_pf_7_mesher_6Mesher_10get_draco_encoded_mesh(struct __pyx
  *     def get_mesh(self, mesh_id, normals=False, simplification_factor=0, max_simplification_error=8):
  *         return self.thisptr.get_mesh(mesh_id, normals, simplification_factor, max_simplification_error)
  *     def get_draco_encoded_mesh(self, mesh_id, normals=False, simplification_factor=0, max_simplification_error=8):             # <<<<<<<<<<<<<<
- *         return dereference(self.thisptr.get_draco_encoded_mesh(mesh_id, normals, simplification_factor, max_simplification_error))
+ *         return self.thisptr.get_draco_encoded_mesh(mesh_id, normals, simplification_factor, max_simplification_error)
  */
 
   /* function exit code */
@@ -2126,58 +2125,6 @@ static PyObject *__pyx_convert_vector_to_py_unsigned_int(const std::vector<unsig
   return __pyx_r;
 }
 
-static PyObject *__pyx_convert_vector_to_py_char(const std::vector<char>  &__pyx_v_v) {
-  size_t __pyx_v_i;
-  PyObject *__pyx_r = NULL;
-  __Pyx_RefNannyDeclarations
-  PyObject *__pyx_t_1 = NULL;
-  size_t __pyx_t_2;
-  size_t __pyx_t_3;
-  PyObject *__pyx_t_4 = NULL;
-  __Pyx_RefNannySetupContext("__pyx_convert_vector_to_py_char", 0);
-
-  /* "vector.to_py":68
- * @cname("__pyx_convert_vector_to_py_char")
- * cdef object __pyx_convert_vector_to_py_char(vector[X]& v):
- *     return [X_to_py(v[i]) for i in range(v.size())]             # <<<<<<<<<<<<<<
- * 
- * 
- */
-  __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = PyList_New(0); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 68, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = __pyx_v_v.size();
-  for (__pyx_t_3 = 0; __pyx_t_3 < __pyx_t_2; __pyx_t_3+=1) {
-    __pyx_v_i = __pyx_t_3;
-    __pyx_t_4 = __Pyx_PyInt_From_char((__pyx_v_v[__pyx_v_i])); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 68, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_4);
-    if (unlikely(__Pyx_ListComp_Append(__pyx_t_1, (PyObject*)__pyx_t_4))) __PYX_ERR(1, 68, __pyx_L1_error)
-    __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  }
-  __pyx_r = __pyx_t_1;
-  __pyx_t_1 = 0;
-  goto __pyx_L0;
-
-  /* "vector.to_py":67
- * 
- * @cname("__pyx_convert_vector_to_py_char")
- * cdef object __pyx_convert_vector_to_py_char(vector[X]& v):             # <<<<<<<<<<<<<<
- *     return [X_to_py(v[i]) for i in range(v.size())]
- * 
- */
-
-  /* function exit code */
-  __pyx_L1_error:;
-  __Pyx_XDECREF(__pyx_t_1);
-  __Pyx_XDECREF(__pyx_t_4);
-  __Pyx_AddTraceback("vector.to_py.__pyx_convert_vector_to_py_char", __pyx_clineno, __pyx_lineno, __pyx_filename);
-  __pyx_r = 0;
-  __pyx_L0:;
-  __Pyx_XGIVEREF(__pyx_r);
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
 static PyObject *__pyx_tp_new_7_mesher_Mesher(PyTypeObject *t, PyObject *a, PyObject *k) {
   PyObject *o;
   if (likely((t->tp_flags & Py_TPFLAGS_IS_ABSTRACT) == 0)) {
@@ -2462,8 +2409,8 @@ PyMODINIT_FUNC PyInit__mesher(void)
 
   /* "vector.to_py":67
  * 
- * @cname("__pyx_convert_vector_to_py_char")
- * cdef object __pyx_convert_vector_to_py_char(vector[X]& v):             # <<<<<<<<<<<<<<
+ * @cname("__pyx_convert_vector_to_py_unsigned_int")
+ * cdef object __pyx_convert_vector_to_py_unsigned_int(vector[X]& v):             # <<<<<<<<<<<<<<
  *     return [X_to_py(v[i]) for i in range(v.size())]
  * 
  */
@@ -3376,24 +3323,24 @@ static PyObject* __pyx_convert__to_py_struct__MeshObject(struct MeshObject s) {
         return NULL;
       }
       /* CIntToPy */
-      static CYTHON_INLINE PyObject* __Pyx_PyInt_From_char(char value) {
-    const char neg_one = (char) -1, const_zero = (char) 0;
+      static CYTHON_INLINE PyObject* __Pyx_PyInt_From_int(int value) {
+    const int neg_one = (int) -1, const_zero = (int) 0;
     const int is_unsigned = neg_one > const_zero;
     if (is_unsigned) {
-        if (sizeof(char) < sizeof(long)) {
+        if (sizeof(int) < sizeof(long)) {
             return PyInt_FromLong((long) value);
-        } else if (sizeof(char) <= sizeof(unsigned long)) {
+        } else if (sizeof(int) <= sizeof(unsigned long)) {
             return PyLong_FromUnsignedLong((unsigned long) value);
 #ifdef HAVE_LONG_LONG
-        } else if (sizeof(char) <= sizeof(unsigned PY_LONG_LONG)) {
+        } else if (sizeof(int) <= sizeof(unsigned PY_LONG_LONG)) {
             return PyLong_FromUnsignedLongLong((unsigned PY_LONG_LONG) value);
 #endif
         }
     } else {
-        if (sizeof(char) <= sizeof(long)) {
+        if (sizeof(int) <= sizeof(long)) {
             return PyInt_FromLong((long) value);
 #ifdef HAVE_LONG_LONG
-        } else if (sizeof(char) <= sizeof(PY_LONG_LONG)) {
+        } else if (sizeof(int) <= sizeof(PY_LONG_LONG)) {
             return PyLong_FromLongLong((PY_LONG_LONG) value);
 #endif
         }
@@ -3401,7 +3348,7 @@ static PyObject* __pyx_convert__to_py_struct__MeshObject(struct MeshObject s) {
     {
         int one = 1; int little = (int)*(unsigned char *)&one;
         unsigned char *bytes = (unsigned char *)&value;
-        return _PyLong_FromByteArray(bytes, sizeof(char),
+        return _PyLong_FromByteArray(bytes, sizeof(int),
                                      little, !is_unsigned);
     }
 }

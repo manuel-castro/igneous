@@ -1,0 +1,7 @@
+-std=c++11 -l:./ext/third_party/draco_build/lib/libdracoenc.a -l:./ext/third_party/draco_build/lib/libdraco.a -l:./ext/third_party/draco_build/lib/libdracodec.a
+
+
+        # vector[char] *get_draco_encoded_mesh(uint64_t, bool normals, int simplification_factor, int max_simplification_error)
+
+
+        # return dereference(self.thisptr.get_draco_encoded_mesh(mesh_id, normals, simplification_factor, max_simplification_error))
