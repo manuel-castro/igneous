@@ -25,7 +25,7 @@ cdef extern from "cMesher.h":
         void mesh(vector[uint64_t], unsigned int, unsigned int, unsigned int)
         vector[uint64_t] ids()
         MeshObject get_mesh(uint64_t, bool normals, int simplification_factor, int max_simplification_error)
-        int get_draco_encoded_mesh(uint64_t, bool normals, int simplification_factor, int max_simplification_error)
+        vector[char] get_draco_encoded_mesh(uint64_t, bool normals, int simplification_factor, int max_simplification_error, float xmin, float ymin, float zmin, uint64_t remapped_id)
 
 # creating a cython wrapper class
 cdef class Mesher:
@@ -43,5 +43,5 @@ cdef class Mesher:
         return self.thisptr.ids()
     def get_mesh(self, mesh_id, normals=False, simplification_factor=0, max_simplification_error=8):
         return self.thisptr.get_mesh(mesh_id, normals, simplification_factor, max_simplification_error)
-    def get_draco_encoded_mesh(self, mesh_id, normals=False, simplification_factor=0, max_simplification_error=8):
-        return self.thisptr.get_draco_encoded_mesh(mesh_id, normals, simplification_factor, max_simplification_error)
+    def get_draco_encoded_mesh(self, mesh_id, normals=False, simplification_factor=0, max_simplification_error=8, xmin=0, ymin=0, zmin=0, remapped_id=0):
+        return self.thisptr.get_draco_encoded_mesh(mesh_id, normals, simplification_factor, max_simplification_error, xmin, ymin, zmin, remapped_id)

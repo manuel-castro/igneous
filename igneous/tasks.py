@@ -243,8 +243,9 @@ class MeshTask(RegisteredTask):
     self._volume = CloudVolume(
         self.layer_path, self.options['mip'], bounded=False,
         parallel=self.options['parallel_download'])
-    self._bounds = Bbox(self.offset, self.shape + self.offset)
-    self._bounds = Bbox.clamp(self._bounds, self._volume.bounds)
+    # self._bounds = Bbox(self.offset, self.shape + self.offset)
+    self._bounds = Bbox((44200//4, 36880//4, 1200), (45100//4, 37300//4, 1300))
+    # self._bounds = Bbox.clamp(self._bounds, self._volume.bounds)
 
     self._mesher = Mesher(self._volume.resolution)
 
@@ -267,7 +268,8 @@ class MeshTask(RegisteredTask):
     # chunk_position includes the overlap specified by low_padding/high_padding
     self._data = self._volume[data_bounds.to_slices()]
     self._remap()
-    self._compute_meshes()
+    # self._compute_meshes()
+    self._compute_draco_meshes()
 
   def _remap(self):
     if self.options['remap_table'] is not None:
@@ -280,6 +282,25 @@ class MeshTask(RegisteredTask):
 
       do_remap = lambda x: enumerated_remap[actual_remap.get(x, 0)]
       self._data = np.vectorize(do_remap)(self._data)
+
+  def _compute_draco_meshes(self):
+    with Storage(self.layer_path) as storage:
+      data = self._data[:, :, :, 0].T
+      self._mesher.mesh(data)
+      for obj_id in self._mesher.ids():
+        print("obj_id " + obj_id)
+        if self.options['remap_table'] is None:
+          remapped_id = obj_id
+        else:
+          remapped_id = self._remap_list[obj_id]
+        xmin, ymin, zmin = self._bounds.minpt
+        mesh = self._mesher.get_draco_encoded_mesh(
+          obj_id,
+          simplification_factor=self.options['simplification_factor'],
+          max_simplification_error=self.options['max_simplification_error'],
+          xmin=xmin, ymin=ymin, zmin=zmin, remapped_id=remapped_id
+        )
+
 
   def _compute_meshes(self):
     with Storage(self.layer_path) as storage:

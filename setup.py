@@ -36,8 +36,11 @@ setuptools.setup(
             #   os.path.join(third_party_dir, 'draco_build/lib/', name) for name in ('libdracoenc.a', 'libdraco.a', 'libdracodec.a')
             # ],
             extra_compile_args=[
-              '-std=c++11','-O3', '-l:./ext/third_party/draco_build/lib/libdracoenc.a', '-l:./ext/third_party/draco_build/lib/libdraco.a', '-l:./ext/third_party/draco_build/lib/libdracodec.a'
-            ]), #don't use  '-fvisibility=hidden', python can't see init module
+              '-std=c++11','-O3'
+            ], #don't use  '-fvisibility=hidden', python can't see init module
+            extra_link_args=[
+              '-l:./ext/third_party/draco_build/new_lib/libdracoenc.a', '-l:./ext/third_party/draco_build/new_lib/libdraco.a', '-l:./ext/third_party/draco_build/new_lib/libdracodec.a'
+            ]),
         setuptools.Extension(
             'fastremap',
             sources=[ './ext/remap/fastremap.cpp' ],

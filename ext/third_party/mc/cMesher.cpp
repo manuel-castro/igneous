@@ -226,8 +226,83 @@ MeshObject CMesher::get_mesh(uint64_t id, bool generate_normals,
 
 // }
 
+std::vector<char> CMesher::get_draco_encoded_mesh(uint64_t id, bool generate_normals,
+                                                  int simplification_factor,
+                                                  int max_simplification_error, float xmin, float ymin, float zmin, uint64_t remapped_id)
+{
+  MeshObject obj;
 
-  /*std::vector<char> **/int CMesher::get_draco_encoded_mesh(uint64_t id, bool generate_normals,
+  if (marchingcubes_.count(id) == 0)
+  { // MC produces no triangles if either
+    // none or all voxels were labeled!
+    // return obj;
+    printf("empty mesh exception\n");
+    throw;
+  }
+
+  zi::mesh::int_mesh im;
+  im.add(marchingcubes_.get_triangles(id));
+  im.fill_simplifier<double>(simplifier_, 0, 0, 0, voxelresolution_[2],
+                             voxelresolution_[1], voxelresolution_[0]);
+  simplifier_.prepare(generate_normals);
+
+  if (simplification_factor > 0)
+  {
+    // This is the most cpu intensive line
+    simplifier_.optimize(
+        simplifier_.face_count() / simplification_factor,
+        max_simplification_error);
+  }
+  printf("going for remapped_id %s\n", std::to_string(remapped_id));
+  std::vector<zi::vl::vec3d> points;
+  std::vector<zi::vl::vec3d> normals;
+  std::vector<zi::vl::vec<unsigned, 3>> faces;
+
+  simplifier_.get_faces(points, normals, faces);
+
+  draco::TriangleSoupMeshBuilder mb;
+  mb.Start(faces.size());
+  const int pos_att_id =
+    mb.AddAttribute(draco::GeometryAttribute::POSITION, 3, draco::DataType::DT_FLOAT32);
+
+  std::vector<int> resolution{32, 32, 40};
+  std::vector<float> bounds{xmin, ymin, zmin};
+
+  printf("before faces\n");
+  for (std::size_t i = 0; i < faces.size(); ++i) {
+    zi::vl::vec<unsigned, 3> cur_face = faces[i];
+    zi::vl::vec3d point1 = points[cur_face[0]];
+    zi::vl::vec3d point2 = points[cur_face[1]];
+    zi::vl::vec3d point3 = points[cur_face[2]];
+    for (int j = 0; j < 3; ++j) {
+      point1[j] /= 2.0;
+      point1[j] += bounds[j] * resolution[j];
+      point2[j] /= 2.0;
+      point2[j] += bounds[j] * resolution[j];
+      point3[j] /= 2.0;
+      point3[j] += bounds[j] * resolution[j];
+    }
+    mb.SetAttributeValuesForFace(pos_att_id, draco::FaceIndex(i), static_cast<void *>(&point1), static_cast<void *>(&point2), static_cast<void*>(&point3));
+  }
+
+  printf("after faces\n");
+  std::unique_ptr<draco::Mesh> ptr_mesh = mb.Finalize();
+  draco::Mesh *mesh = ptr_mesh.get();
+  draco::Encoder encoder;
+  encoder.SetAttributeQuantization(draco::GeometryAttribute::POSITION, 14);
+  encoder.SetSpeedOptions(3, 3);
+  // printf("after encoder setup\n");
+  draco::EncoderBuffer buffer;
+  const draco::Status status = encoder.EncodeMeshToBuffer(*mesh, &buffer);
+  const std::string &file = "meshTest" + std::to_string(remapped_id) + ".drc";
+  std::ofstream out_file(file, std::ios::binary);
+  out_file.write(buffer.data(), buffer.size());
+  printf("after encoding and writing\n");
+  std::vector<char> dummy{'t'};
+  return dummy;
+}
+
+/*std::vector<char> int CMesher::get_draco_encoded_mesh(uint64_t id, bool generate_normals,
                             int simplification_factor,
                             int max_simplification_error) {
 draco::TriangleSoupMeshBuilder mb;
@@ -304,4 +379,4 @@ draco::TriangleSoupMeshBuilder mb;
         std::ofstream out_file(file, std::ios::binary);
         out_file.write(buffer.data(), buffer.size());
         return 1;
-                            }
+                            }*/

@@ -5,3 +5,5 @@
 
 
         # return dereference(self.thisptr.get_draco_encoded_mesh(mesh_id, normals, simplification_factor, max_simplification_error))
+
+g++ -std=c++11 -I./ -I./../../draco_build testMesh.cc -l:./../../draco_build/lib/libdracoenc.a -l:./../../draco_build/lib/libdraco.a -l:./../../draco_build/lib/libdracodec.a 
