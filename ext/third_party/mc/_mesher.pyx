@@ -25,11 +25,14 @@ cdef extern from "cMesher.h":
         void mesh(vector[uint64_t], unsigned int, unsigned int, unsigned int)
         vector[uint64_t] ids()
         MeshObject get_mesh(uint64_t, bool normals, int simplification_factor, int max_simplification_error)
-        vector[char] get_draco_encoded_mesh(uint64_t, bool normals, int simplification_factor, int max_simplification_error, float xmin, float ymin, float zmin, uint64_t remapped_id)
+        void get_draco_encoded_mesh(uint64_t, bool normals, int simplification_factor, int max_simplification_error, float xmin, float ymin, float zmin, uint64_t remapped_id, const char **bytes_ptr, size_t *bytes_len)
 
 # creating a cython wrapper class
 cdef class Mesher:
     cdef CMesher *thisptr      # hold a C++ instance which we're wrapping
+    cdef const char* c_string
+    cdef size_t str_len
+    cdef bytes py_string
     def __cinit__(self, voxel_res):
         self.thisptr = new CMesher(voxel_res.astype(np.uint32))
     def __dealloc__(self):
@@ -44,4 +47,10 @@ cdef class Mesher:
     def get_mesh(self, mesh_id, normals=False, simplification_factor=0, max_simplification_error=8):
         return self.thisptr.get_mesh(mesh_id, normals, simplification_factor, max_simplification_error)
     def get_draco_encoded_mesh(self, mesh_id, normals=False, simplification_factor=0, max_simplification_error=8, xmin=0, ymin=0, zmin=0, remapped_id=0):
-        return self.thisptr.get_draco_encoded_mesh(mesh_id, normals, simplification_factor, max_simplification_error, xmin, ymin, zmin, remapped_id)
+        #c_string = NULL
+        self.thisptr.get_draco_encoded_mesh(mesh_id, normals, simplification_factor, max_simplification_error, xmin, ymin, zmin, remapped_id, &self.c_string, &self.str_len)
+        try:
+            self.py_string = self.c_string[:self.str_len]  # Performs a copy of the data
+        finally:
+            #free(c_string)
+            return self.py_string

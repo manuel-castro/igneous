@@ -14,6 +14,7 @@ Adapted to include passing of multidimensional arrays
 #include "draco/mesh/triangle_soup_mesh_builder.h"
 #include "draco/compression/encode.h"
 #include "draco/core/encoder_buffer.h"
+#include "draco/core/vector_d.h"
 #include <fstream>
 #include <assert.h> 
 
@@ -226,9 +227,9 @@ MeshObject CMesher::get_mesh(uint64_t id, bool generate_normals,
 
 // }
 
-std::vector<char> CMesher::get_draco_encoded_mesh(uint64_t id, bool generate_normals,
+void CMesher::get_draco_encoded_mesh(uint64_t id, bool generate_normals,
                                                   int simplification_factor,
-                                                  int max_simplification_error, float xmin, float ymin, float zmin, uint64_t remapped_id)
+                                                  int max_simplification_error, float xmin, float ymin, float zmin, uint64_t remapped_id, const char **bytes_ptr, size_t *bytes_len)
 {
   MeshObject obj;
 
@@ -253,7 +254,7 @@ std::vector<char> CMesher::get_draco_encoded_mesh(uint64_t id, bool generate_nor
         simplifier_.face_count() / simplification_factor,
         max_simplification_error);
   }
-  printf("going for remapped_id %s\n", std::to_string(remapped_id));
+  // printf("going for remapped_id %s\n", std::to_string(remapped_id));
   std::vector<zi::vl::vec3d> points;
   std::vector<zi::vl::vec3d> normals;
   std::vector<zi::vl::vec<unsigned, 3>> faces;
@@ -268,38 +269,40 @@ std::vector<char> CMesher::get_draco_encoded_mesh(uint64_t id, bool generate_nor
   std::vector<int> resolution{32, 32, 40};
   std::vector<float> bounds{xmin, ymin, zmin};
 
-  printf("before faces\n");
+  // printf("before faces\n");
+  for (int i = 0; i < points.size(); ++i) {
+    for (int j = 0; j < 3; ++j) {
+      points[i][j] /= 2.0;
+      points[i][j] += bounds[j] * resolution[j];
+    }
+  }
   for (std::size_t i = 0; i < faces.size(); ++i) {
     zi::vl::vec<unsigned, 3> cur_face = faces[i];
     zi::vl::vec3d point1 = points[cur_face[0]];
     zi::vl::vec3d point2 = points[cur_face[1]];
     zi::vl::vec3d point3 = points[cur_face[2]];
-    for (int j = 0; j < 3; ++j) {
-      point1[j] /= 2.0;
-      point1[j] += bounds[j] * resolution[j];
-      point2[j] /= 2.0;
-      point2[j] += bounds[j] * resolution[j];
-      point3[j] /= 2.0;
-      point3[j] += bounds[j] * resolution[j];
-    }
-    mb.SetAttributeValuesForFace(pos_att_id, draco::FaceIndex(i), static_cast<void *>(&point1), static_cast<void *>(&point2), static_cast<void*>(&point3));
+    // mb.SetAttributeValuesForFace(pos_att_id, draco::FaceIndex(i), static_cast<void *>(&point1), static_cast<void *>(&point2), static_cast<void*>(&point3));
+    mb.SetAttributeValuesForFace(pos_att_id, draco::FaceIndex(i), draco::Vector3f(point1[0], point1[1], point1[2]).data(), draco::Vector3f(point2[0], point2[1], point2[2]).data(), draco::Vector3f(point3[0], point3[1], point3[2]).data());  
   }
 
-  printf("after faces\n");
+  // printf("after faces\n");
   std::unique_ptr<draco::Mesh> ptr_mesh = mb.Finalize();
   draco::Mesh *mesh = ptr_mesh.get();
   draco::Encoder encoder;
   encoder.SetAttributeQuantization(draco::GeometryAttribute::POSITION, 14);
   encoder.SetSpeedOptions(3, 3);
-  // printf("after encoder setup\n");
   draco::EncoderBuffer buffer;
   const draco::Status status = encoder.EncodeMeshToBuffer(*mesh, &buffer);
-  const std::string &file = "meshTest" + std::to_string(remapped_id) + ".drc";
-  std::ofstream out_file(file, std::ios::binary);
-  out_file.write(buffer.data(), buffer.size());
-  printf("after encoding and writing\n");
-  std::vector<char> dummy{'t'};
-  return dummy;
+  // printf("after encoder setup\n");
+  // const std::string &file = "meshTest" + std::to_string(remapped_id) + ".drc";
+  // std::ofstream out_file(file, std::ios::binary);
+  // out_file.write(buffer.data(), buffer.size());
+  // printf("after writing\n");
+  // std::vector<char> dummy{'t'};
+  // return dummy;
+  // return *(buffer.buffer());
+  *bytes_ptr = buffer.data();
+  *bytes_len = buffer.size();
 }
 
 /*std::vector<char> int CMesher::get_draco_encoded_mesh(uint64_t id, bool generate_normals,

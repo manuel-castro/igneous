@@ -287,8 +287,9 @@ class MeshTask(RegisteredTask):
     with Storage(self.layer_path) as storage:
       data = self._data[:, :, :, 0].T
       self._mesher.mesh(data)
+      print(len(self._mesher.ids()))
       for obj_id in self._mesher.ids():
-        print("obj_id " + obj_id)
+        # print("obj_id ", obj_id)
         if self.options['remap_table'] is None:
           remapped_id = obj_id
         else:
@@ -300,6 +301,31 @@ class MeshTask(RegisteredTask):
           max_simplification_error=self.options['max_simplification_error'],
           xmin=xmin, ymin=ymin, zmin=zmin, remapped_id=remapped_id
         )
+        # mbb = np.array(mesh)
+        # mesh_bytes = mbb.tobytes()
+        storage.put_file(
+            file_path='{}/{}:{}:{}'.format(
+                self._mesh_dir, remapped_id, self.options['lod'],
+                self._bounds.to_filename()
+            ),
+            content=mesh,
+            # compress=True,
+            cache_control=self.options['cache_control']
+        )
+
+        if self.options['generate_manifests']:
+          fragments = []
+          fragments.append('{}:{}:{}'.format(remapped_id, self.options['lod'],
+                                             self._bounds.to_filename()))
+
+          storage.put_file(
+              file_path='{}/{}:{}'.format(
+                  self._mesh_dir, remapped_id, self.options['lod']),
+              content=json.dumps({"fragments": fragments}),
+              content_type='application/json',
+              cache_control=self.options['cache_control']
+          )
+
 
 
   def _compute_meshes(self):

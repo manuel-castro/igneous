@@ -36,6 +36,6 @@ class CMesher {
   std::vector<uint64_t> ids();
   MeshObject get_mesh(uint64_t id, bool generate_normals, int simplification_factor, int max_error);
   //std::vector<char> *get_draco_encoded_mesh(uint64_t id, bool generate_normals, int simplification_factor, int max_error);
-  std::vector<char> get_draco_encoded_mesh(uint64_t id, bool generate_normals, int simplification_factor, int max_error, float xmin, float ymin, float zmin, uint64_t remapped_id);
+  void get_draco_encoded_mesh(uint64_t id, bool generate_normals, int simplification_factor, int max_error, float xmin, float ymin, float zmin, uint64_t remapped_id, const char **bytes_ptr, size_t *bytes_len);
   // get_draco_mesh_buffer
 };
